@@ -103,7 +103,10 @@ class RevolutionaryQuestionEngine:
         state_election_months = [2, 3, 4, 5, 10, 11, 12]  # Common state election months
         
         # Analyze demographic updates around election periods
-        demographic_updates = df[df['update_type'] == 'demographic'].copy() if 'demographic' in df['update_type'].values else df.copy()
+        if 'update_type' in df.columns and 'demographic' in df['update_type'].values:
+            demographic_updates = df[df['update_type'] == 'demographic'].copy()
+        else:
+            demographic_updates = df.copy()
         
         election_analysis = {}
         
@@ -137,7 +140,7 @@ class RevolutionaryQuestionEngine:
         election_analysis['pre_election_surge'] = pre_election_surge
         
         # 2. Address update patterns (people moving for elections?)
-        if 'address' in df.get('update_type', []).values:
+        if 'update_type' in df.columns and 'address' in df['update_type'].values:
             address_updates = df[df['update_type'] == 'address']
             
             # Monthly address update patterns
@@ -352,7 +355,10 @@ class RevolutionaryQuestionEngine:
             return {}
         
         # Focus on address updates as proxy for migration
-        address_updates = df[df['update_type'] == 'address'].copy() if 'address' in df['update_type'].values else df.copy()
+        if 'update_type' in df.columns and 'address' in df['update_type'].values:
+            address_updates = df[df['update_type'] == 'address'].copy()
+        else:
+            address_updates = df.copy()
         
         if len(address_updates) < 10:
             return {}
@@ -469,7 +475,6 @@ class ROICalculator:
 
 class NovelInsightGenerator:
     """Generate novel insights that others won't find"""
-    """Generate breakthrough insights that will win the hackathon"""
     
     @staticmethod
     def aadhaar_ecosystem_health_score(df: pd.DataFrame) -> dict:
@@ -540,7 +545,10 @@ class NovelInsightGenerator:
             health_metrics['demographic_equity_score'] = demographic_equity_score
         
         # 5. Innovation Readiness Index (IRI) - System's readiness for future tech
-        mobile_updates = len(df[df.get('update_type', '') == 'mobile']) if 'update_type' in df.columns else 0
+        if 'update_type' in df.columns:
+            mobile_updates = len(df[df['update_type'] == 'mobile'])
+        else:
+            mobile_updates = 0
         total_updates = len(df)
         
         digital_adoption_rate = mobile_updates / total_updates if total_updates > 0 else 0
@@ -590,12 +598,26 @@ class NovelInsightGenerator:
         
         if 'update_type' in df.columns and 'success_rate' in df.columns:
             # Create journey stages
-            journey_stages = {
-                'enrollment': df[df.get('update_type', '') == 'new_enrollment'] if 'new_enrollment' in df.get('update_type', []).values else pd.DataFrame(),
-                'first_update': df[df.get('update_type', '') == 'demographic'],
-                'biometric_update': df[df.get('update_type', '') == 'biometric'],
-                'mobile_linking': df[df.get('update_type', '') == 'mobile']
-            }
+            journey_stages = {}
+            
+            if 'update_type' in df.columns:
+                # Check if new_enrollment exists in update_type values
+                if 'new_enrollment' in df['update_type'].values:
+                    journey_stages['enrollment'] = df[df['update_type'] == 'new_enrollment']
+                else:
+                    journey_stages['enrollment'] = pd.DataFrame()
+                
+                journey_stages['first_update'] = df[df['update_type'] == 'demographic'] if 'demographic' in df['update_type'].values else pd.DataFrame()
+                journey_stages['biometric_update'] = df[df['update_type'] == 'biometric'] if 'biometric' in df['update_type'].values else pd.DataFrame()
+                journey_stages['mobile_linking'] = df[df['update_type'] == 'mobile'] if 'mobile' in df['update_type'].values else pd.DataFrame()
+            else:
+                # If no update_type column, create empty DataFrames
+                journey_stages = {
+                    'enrollment': pd.DataFrame(),
+                    'first_update': pd.DataFrame(),
+                    'biometric_update': pd.DataFrame(),
+                    'mobile_linking': pd.DataFrame()
+                }
             
             # Calculate friction points
             friction_analysis = {}
@@ -633,7 +655,11 @@ class NovelInsightGenerator:
             # Simulate different policy scenarios
             
             # 1. Digital-First Policy Impact
-            current_digital_adoption = len(df[df.get('update_type', '') == 'mobile']) / len(df)
+            if 'update_type' in df.columns:
+                current_digital_adoption = len(df[df['update_type'] == 'mobile']) / len(df)
+            else:
+                # Simulate digital adoption rate if column doesn't exist
+                current_digital_adoption = 0.3  # 30% baseline
             
             # Simulate 50% increase in digital adoption
             simulated_digital_increase = current_digital_adoption * 1.5
@@ -679,7 +705,6 @@ class NovelInsightGenerator:
             }
         
         return policy_simulations
-    """Generate novel insights that others won't find"""
     
     @staticmethod
     def digital_divide_analysis(df: pd.DataFrame) -> dict:
@@ -1372,7 +1397,10 @@ class AdvancedAadhaarAnalyzer:
             df['date'] = pd.to_datetime(df['date'], errors='coerce')
             
             # Create treatment and control groups
-            mobile_updates = df[df['update_type'] == 'mobile'].copy()
+            if 'mobile' in df['update_type'].values:
+                mobile_updates = df[df['update_type'] == 'mobile'].copy()
+            else:
+                mobile_updates = pd.DataFrame()
             
             if len(mobile_updates) > 10:
                 # For each mobile update, look at subsequent biometric updates
@@ -1394,8 +1422,15 @@ class AdvancedAadhaarAnalyzer:
                     ]
                     
                     if len(after_period) > 0 and len(before_period) > 0:
-                        after_biometric = len(after_period[after_period['update_type'] == 'biometric'])
-                        before_biometric = len(before_period[before_period['update_type'] == 'biometric'])
+                        if 'biometric' in after_period['update_type'].values:
+                            after_biometric = len(after_period[after_period['update_type'] == 'biometric'])
+                        else:
+                            after_biometric = 0
+                            
+                        if 'biometric' in before_period['update_type'].values:
+                            before_biometric = len(before_period[before_period['update_type'] == 'biometric'])
+                        else:
+                            before_biometric = 0
                         
                         causal_effect = after_biometric - before_biometric
                         causal_effects.append(causal_effect)
@@ -1441,25 +1476,6 @@ class AdvancedAadhaarAnalyzer:
             causal_insights['geographic_spillover'] = spillover_effects
         
         return causal_insights
-        """Generate UNIQUE breakthrough insights that will win the hackathon"""
-        breakthrough_insights = {}
-        
-        # 1. Aadhaar Ecosystem Health Score (UNIQUE!)
-        breakthrough_insights['ecosystem_health'] = BreakthroughInsightEngine.aadhaar_ecosystem_health_score(df)
-        
-        # 2. Citizen Journey Optimization Matrix (UNIQUE!)
-        breakthrough_insights['citizen_journey'] = BreakthroughInsightEngine.citizen_journey_optimization_matrix(df)
-        
-        # 3. Predictive Policy Impact Simulator (UNIQUE!)
-        breakthrough_insights['policy_simulator'] = BreakthroughInsightEngine.predictive_policy_impact_simulator(df)
-        
-        # 4. AI-Powered Anomaly Pattern Classification (UNIQUE!)
-        breakthrough_insights['anomaly_patterns'] = self._classify_anomaly_patterns(df)
-        
-        # 5. Dynamic Resource Allocation Algorithm (UNIQUE!)
-        breakthrough_insights['resource_optimization'] = self._dynamic_resource_allocation(df)
-        
-        return breakthrough_insights
     
     def _classify_anomaly_patterns(self, df: pd.DataFrame) -> dict:
         """UNIQUE: Classify different types of anomalies and their business meaning"""
@@ -1574,28 +1590,6 @@ class AdvancedAadhaarAnalyzer:
             'roi_estimate': (total_volume_increase * 100) / total_investment * 100 if total_investment > 0 else 0,  # 100 INR value per additional transaction
             'implementation_timeline': '12-18 months'
         }
-        """Generate cutting-edge insights that will win the hackathon"""
-        insights = {}
-        
-        # 1. Digital Divide Analysis
-        insights['digital_divide'] = NovelInsightGenerator.digital_divide_analysis(df)
-        
-        # 2. Service Accessibility Index
-        insights['accessibility'] = NovelInsightGenerator.service_accessibility_index(df)
-        
-        # 3. Behavioral Pattern Mining
-        insights['behavioral_patterns'] = NovelInsightGenerator.behavioral_pattern_mining(df)
-        
-        # 4. Efficiency Opportunity Analysis
-        insights['efficiency_opportunities'] = self._identify_efficiency_opportunities(df)
-        
-        # 5. Predictive Service Demand
-        insights['service_demand_forecast'] = self._forecast_service_demand(df)
-        
-        # 6. System Optimization Recommendations
-        insights['optimization_recommendations'] = self._generate_optimization_recommendations(df)
-        
-        return insights
     
     def _identify_efficiency_opportunities(self, df: pd.DataFrame) -> dict:
         """Identify specific efficiency improvement opportunities"""

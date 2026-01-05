@@ -177,20 +177,6 @@ analysis_type = st.sidebar.radio(
     help="Different types of data analysis available"
 )
 
-# Handle quick action buttons
-if 'quick_action' in st.session_state:
-    if st.session_state.quick_action == "revolutionary":
-        analysis_type = "🧠 Revolutionary Questions"
-    elif st.session_state.quick_action == "breakthrough":
-        analysis_type = "🚀 Breakthrough Insights"
-    elif st.session_state.quick_action == "ml":
-        analysis_type = "Advanced ML"
-    elif st.session_state.quick_action == "roi":
-        analysis_type = "💰 ROI Analysis"
-    
-    # Clear the quick action
-    del st.session_state.quick_action
-
 st.sidebar.markdown("---")
 
 # Main content area
@@ -308,11 +294,37 @@ else:
         
         insights = []
         
+        # Dynamic insights based on loaded data
+        if not st.session_state.enrolment_data.empty:
+            if 'state' in st.session_state.enrolment_data.columns:
+                top_state = st.session_state.enrolment_data['state'].value_counts().index[0]
+                insights.append(f"🏆 **Top enrollment state**: {top_state}")
+            
+            # Add column-specific insights
+            numeric_cols = st.session_state.enrolment_data.select_dtypes(include=[np.number]).columns
+            if len(numeric_cols) > 0:
+                insights.append(f"📊 **Numeric columns available**: {len(numeric_cols)} for advanced ML analysis")
+        
+        if not st.session_state.demographic_data.empty:
+            insights.append(f"� **Demoographic updates**: {len(st.session_state.demographic_data):,} records loaded")
+            
+            # Check for age-related columns
+            age_cols = [col for col in st.session_state.demographic_data.columns if 'age' in col.lower()]
+            if age_cols:
+                insights.append(f"👥 **Age group columns**: {len(age_cols)} available for demographic analysis")
+        
+        if not st.session_state.biometric_data.empty:
+            insights.append(f"👆 **Biometric updates**: {len(st.session_state.biometric_data):,} records for security analysis")
+        
+        # Add filter insights
+        if state_filter != "All States":
+            insights.append(f"📍 **State filter active**: Analysis focused on {state_filter}")
+        
         # Data volume insights
         if total_records > 1000:
             insights.append(f"📊 **Large Dataset**: Analyzing {total_records:,} records provides robust statistical power")
         elif total_records > 500:
-            insights.append(f"📊 **Medium Dataset**: {total_records:,} records suitable for meaningful analysis")
+            insights.append(f"� **MediEum Dataset**: {total_records:,} records suitable for meaningful analysis")
         else:
             insights.append(f"📊 **Small Dataset**: {total_records:,} records - consider increasing sample size for better insights")
         
@@ -322,7 +334,7 @@ else:
         elif states_count > 5:
             insights.append(f"🗺️ **Good Coverage**: Data covers {states_count} states - regional patterns detectable")
         elif states_count > 1:
-            insights.append(f"🗺️ **Limited Coverage**: Data from {states_count} states - focused regional analysis")
+            insights.append(f"�️ ** Limited Coverage**: Data from {states_count} states - focused regional analysis")
         else:
             insights.append(f"🗺️ **Single State**: Analysis focused on one state - deep local insights possible")
         
@@ -350,13 +362,6 @@ else:
             if bio_size > total_records * 0.2:
                 insights.append(f"👆 **Biometric Activity**: {bio_size:,} biometric updates - security pattern analysis available")
         
-        # Filter-specific insights
-        if state_filter != "All States":
-            insights.append(f"📍 **State Focus**: Analysis filtered for {state_filter} - targeted regional insights")
-        
-        if 'district_filter' in locals() and district_filter != "All Districts":
-            insights.append(f"🏘️ **District Focus**: Analysis filtered for {district_filter} - local-level insights")
-        
         # Advanced analysis recommendations
         if total_records > 500:
             insights.append(f"🚀 **Recommended**: Try 'Revolutionary Questions' for unique insights nobody else will discover")
@@ -376,26 +381,6 @@ else:
                 for j, insight in enumerate(insights[i:i+cols_per_row]):
                     with cols[j]:
                         st.info(insight)
-        
-        # Quick action buttons
-        st.subheader("🎯 Quick Actions")
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            if st.button("🧠 Revolutionary Questions", help="Ask questions nobody else will think of"):
-                st.session_state.quick_action = "revolutionary"
-        
-        with col2:
-            if st.button("🚀 Breakthrough Insights", help="Generate world-first discoveries"):
-                st.session_state.quick_action = "breakthrough"
-        
-        with col3:
-            if st.button("🤖 Advanced ML", help="Run XGBoost predictive modeling"):
-                st.session_state.quick_action = "ml"
-        
-        with col4:
-            if st.button("💰 ROI Analysis", help="Calculate business impact and ROI"):
-                st.session_state.quick_action = "roi"
 
     st.markdown("---")
 
@@ -2104,54 +2089,16 @@ else:
         else:
             st.info("📊 **No Data Available** - Please load data first for ROI analysis")
 
-# Insights panel in sidebar
-if st.session_state.data_loaded:
+# Show applied filters summary in sidebar
+if st.session_state.data_loaded and st.session_state.get('filters_loaded', False):
     st.sidebar.markdown("---")
-    st.sidebar.subheader("💡 Key Insights")
-    
-    insights = []
-    
-    # Generate dynamic insights based on loaded data
-    if not st.session_state.enrolment_data.empty:
-        if 'state' in st.session_state.enrolment_data.columns:
-            top_state = st.session_state.enrolment_data['state'].value_counts().index[0]
-            insights.append(f"🏆 Top enrollment state: {top_state}")
-        
-        # Add column-specific insights
-        numeric_cols = st.session_state.enrolment_data.select_dtypes(include=[np.number]).columns
-        if len(numeric_cols) > 0:
-            insights.append(f"📊 Numeric columns available: {len(numeric_cols)}")
-    
-    if not st.session_state.demographic_data.empty:
-        insights.append(f"📊 Demographic updates: {len(st.session_state.demographic_data):,} records")
-        
-        # Check for age-related columns
-        age_cols = [col for col in st.session_state.demographic_data.columns if 'age' in col.lower()]
-        if age_cols:
-            insights.append(f"👥 Age group columns: {len(age_cols)}")
-    
-    if not st.session_state.biometric_data.empty:
-        insights.append(f"👆 Biometric updates: {len(st.session_state.biometric_data):,} records")
-    
-    # Add filter insights
-    if st.session_state.get('filters_loaded', False):
-        insights.append("🎯 Dynamic filters active")
-        if state_filter != "All States":
-            insights.append(f"📍 Filtered by: {state_filter}")
-    
-    # Display insights
-    for insight in insights:
-        st.sidebar.info(insight)
-    
-    # Show applied filters summary
-    if st.session_state.get('filters_loaded', False):
-        with st.sidebar.expander("🔧 Applied Filters"):
-            st.write(f"**State:** {state_filter}")
-            if 'district_filter' in locals():
-                st.write(f"**District:** {district_filter}")
-            if 'date_start' in locals() and 'date_end' in locals():
-                st.write(f"**Date Range:** {date_start} to {date_end}")
-            st.write(f"**Sample Size:** {sample_size:,}")
+    with st.sidebar.expander("�  Applied Filters"):
+        st.write(f"**State:** {state_filter}")
+        if 'district_filter' in locals():
+            st.write(f"**District:** {district_filter}")
+        if 'date_start' in locals() and 'date_end' in locals():
+            st.write(f"**Date Range:** {date_start} to {date_end}")
+        st.write(f"**Sample Size:** {sample_size:,}")
 
 # Footer
 st.markdown("---")
