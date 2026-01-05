@@ -147,13 +147,13 @@ class AadhaarAPIClient:
         else:
             return pd.DataFrame()
     
-    def get_available_filters(self, dataset_type: str, sample_size: int = 100) -> Dict:
+    def get_available_filters(self, dataset_type: str, records_to_analyze: int = 100) -> Dict:
         """Get available filter options from actual data"""
         
-        sample_df = self.fetch_data(dataset_type, limit=sample_size)
+        analysis_df = self.fetch_data(dataset_type, limit=records_to_analyze)
         
         filters = {
-            'columns': list(sample_df.columns) if not sample_df.empty else [],
+            'columns': list(analysis_df.columns) if not analysis_df.empty else [],
             'states': [],
             'districts': [],
             'date_range': None,
@@ -161,48 +161,48 @@ class AadhaarAPIClient:
             'categorical_columns': []
         }
         
-        if not sample_df.empty:
+        if not analysis_df.empty:
             # Get unique states
-            if 'state' in sample_df.columns:
-                filters['states'] = sorted(sample_df['state'].dropna().unique().tolist())
+            if 'state' in analysis_df.columns:
+                filters['states'] = sorted(analysis_df['state'].dropna().unique().tolist())
             
             # Get unique districts
-            if 'district' in sample_df.columns:
-                filters['districts'] = sorted(sample_df['district'].dropna().unique().tolist())
+            if 'district' in analysis_df.columns:
+                filters['districts'] = sorted(analysis_df['district'].dropna().unique().tolist())
             
             # Get date range
-            date_columns = [col for col in sample_df.columns if 'date' in col.lower() or 'time' in col.lower()]
+            date_columns = [col for col in analysis_df.columns if 'date' in col.lower() or 'time' in col.lower()]
             if date_columns:
                 for date_col in date_columns:
                     try:
-                        sample_df[date_col] = pd.to_datetime(sample_df[date_col], errors='coerce')
-                        if not sample_df[date_col].isna().all():
+                        analysis_df[date_col] = pd.to_datetime(analysis_df[date_col], errors='coerce')
+                        if not analysis_df[date_col].isna().all():
                             filters['date_range'] = {
                                 'column': date_col,
-                                'min_date': sample_df[date_col].min(),
-                                'max_date': sample_df[date_col].max()
+                                'min_date': analysis_df[date_col].min(),
+                                'max_date': analysis_df[date_col].max()
                             }
                             break
                     except:
                         continue
             
             # Categorize columns
-            filters['numeric_columns'] = sample_df.select_dtypes(include=[np.number]).columns.tolist()
-            filters['categorical_columns'] = sample_df.select_dtypes(include=['object']).columns.tolist()
+            filters['numeric_columns'] = analysis_df.select_dtypes(include=[np.number]).columns.tolist()
+            filters['categorical_columns'] = analysis_df.select_dtypes(include=['object']).columns.tolist()
         
         return filters
     
     def get_data_summary(self, dataset_type: str) -> Dict:
         """Get summary information about a dataset"""
         
-        sample_df = self.fetch_data(dataset_type, limit=100)
+        analysis_df = self.fetch_data(dataset_type, limit=100)
         
         return {
             'dataset_type': dataset_type,
-            'sample_size': len(sample_df),
-            'columns': list(sample_df.columns) if not sample_df.empty else [],
+            'records_analyzed': len(analysis_df),
+            'columns': list(analysis_df.columns) if not analysis_df.empty else [],
             'available_states': self.get_available_states(dataset_type)[:10],  # First 10 states
-            'data_types': sample_df.dtypes.to_dict() if not sample_df.empty else {}
+            'data_types': analysis_df.dtypes.to_dict() if not analysis_df.empty else {}
         }
     
     def save_data(self, df: pd.DataFrame, filename: str, format: str = 'csv'):

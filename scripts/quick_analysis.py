@@ -157,7 +157,7 @@ def create_quick_visualizations(enrolment_df, demographic_df, biometric_df):
 
 def main():
     parser = argparse.ArgumentParser(description='Quick analysis of Aadhaar data')
-    parser.add_argument('--sample-size', type=int, default=1000, help='Sample size for quick analysis')
+    parser.add_argument('--records-to-analyze', type=int, default=1000, help='Number of records for quick analysis')
     parser.add_argument('--state', type=str, help='Focus on specific state')
     
     args = parser.parse_args()
@@ -166,15 +166,15 @@ def main():
     client = AadhaarAPIClient()
     
     print("🚀 Starting Quick Aadhaar Data Analysis...")
-    print(f"📊 Sample Size: {args.sample_size:,} records per dataset")
+    print(f"📊 Records to Analyze: {args.records_to_analyze:,} records per dataset")
     if args.state:
         print(f"🗺️  Focus State: {args.state}")
     
-    # Fetch sample data
+    # Fetch real data
     print("\n📥 Fetching data...")
-    enrolment_df = client.fetch_data('enrolment', limit=args.sample_size, state_filter=args.state)
-    demographic_df = client.fetch_data('demographic', limit=args.sample_size, state_filter=args.state)
-    biometric_df = client.fetch_data('biometric', limit=args.sample_size, state_filter=args.state)
+    enrolment_df = client.fetch_data('enrolment', limit=args.records_to_analyze, state_filter=args.state)
+    demographic_df = client.fetch_data('demographic', limit=args.records_to_analyze, state_filter=args.state)
+    biometric_df = client.fetch_data('biometric', limit=args.records_to_analyze, state_filter=args.state)
     
     # Generate insights
     quick_insights(enrolment_df, "Enrolment")

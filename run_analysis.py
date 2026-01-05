@@ -46,7 +46,7 @@ def main():
         print("⚠️  Some packages might already be installed. Continuing...")
     
     # Step 2: Quick analysis
-    quick_cmd = f"python scripts/quick_analysis.py --sample-size 1000"
+    quick_cmd = f"python scripts/quick_analysis.py --records-to-analyze 1000"
     if args.state:
         quick_cmd += f" --state '{args.state}'"
     

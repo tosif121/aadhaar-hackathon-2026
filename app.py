@@ -34,6 +34,42 @@ def init_clients():
 
 client, analyzer, visualizer = init_clients()
 
+# Helper function to get the best available dataset for analysis
+def get_primary_dataset():
+    """Get the primary dataset for analysis based on what's loaded"""
+    if not st.session_state.enrolment_data.empty:
+        return st.session_state.enrolment_data, "Enrolment"
+    elif not st.session_state.demographic_data.empty:
+        return st.session_state.demographic_data, "Demographic Updates"
+    elif not st.session_state.biometric_data.empty:
+        return st.session_state.biometric_data, "Biometric Updates"
+    else:
+        return pd.DataFrame(), "No Data"
+
+def get_combined_dataset():
+    """Get combined dataset for cross-dataset analysis"""
+    combined_data = []
+    
+    if not st.session_state.enrolment_data.empty:
+        enrol_data = st.session_state.enrolment_data.copy()
+        enrol_data['dataset_type'] = 'enrolment'
+        combined_data.append(enrol_data)
+    
+    if not st.session_state.demographic_data.empty:
+        demo_data = st.session_state.demographic_data.copy()
+        demo_data['dataset_type'] = 'demographic'
+        combined_data.append(demo_data)
+    
+    if not st.session_state.biometric_data.empty:
+        bio_data = st.session_state.biometric_data.copy()
+        bio_data['dataset_type'] = 'biometric'
+        combined_data.append(bio_data)
+    
+    if combined_data:
+        return pd.concat(combined_data, ignore_index=True, sort=False)
+    else:
+        return pd.DataFrame()
+
 # Initialize session state
 if 'data_loaded' not in st.session_state:
     st.session_state.data_loaded = False
@@ -58,9 +94,15 @@ st.sidebar.subheader("Data Configuration")
 selected_datasets = st.sidebar.multiselect(
     "Select Datasets",
     ["Enrolment", "Demographic Updates", "Biometric Updates"],
-    default=["Enrolment"],
-    help="Choose which Aadhaar datasets to analyze"
+    default=["Enrolment", "Demographic Updates", "Biometric Updates"],
+    help="Choose which Aadhaar datasets to analyze - you can select multiple datasets for comprehensive analysis"
 )
+
+# Show selected datasets count
+if selected_datasets:
+    st.sidebar.info(f"📊 {len(selected_datasets)} dataset(s) selected")
+else:
+    st.sidebar.warning("⚠️ Please select at least one dataset")
 
 # State filter
 state_filter = st.sidebar.selectbox(
@@ -75,7 +117,7 @@ state_filter = st.sidebar.selectbox(
 
 district_filter = "All Districts"
 
-sample_size = st.sidebar.slider(
+records_to_analyze = st.sidebar.slider(
     "📈 Records to Analyze", 
     100, 5000, 1000, 100,
     help="Number of records to analyze"
@@ -99,19 +141,19 @@ if st.sidebar.button("🚀 Load Data", type="primary", help="Fetch data from Aad
                 if dataset == "Enrolment":
                     st.session_state.enrolment_data = client.fetch_data(
                         'enrolment', 
-                        limit=sample_size, 
+                        limit=records_to_analyze, 
                         state_filter=state_param
                     )
                 elif dataset == "Demographic Updates":
                     st.session_state.demographic_data = client.fetch_data(
                         'demographic', 
-                        limit=sample_size, 
+                        limit=records_to_analyze, 
                         state_filter=state_param
                     )
                 elif dataset == "Biometric Updates":
                     st.session_state.biometric_data = client.fetch_data(
                         'biometric', 
-                        limit=sample_size, 
+                        limit=records_to_analyze, 
                         state_filter=state_param
                     )
             except Exception as e:
@@ -187,9 +229,9 @@ if not st.session_state.data_loaded:
     # Instructions
     st.markdown("""
     ### 🚀 Getting Started
-    1. **Select Datasets**: Choose from Enrolment, Demographic Updates, or Biometric Updates
+    1. **Select Datasets**: Choose one or more datasets (Enrolment, Demographic Updates, Biometric Updates)
     2. **Configure Filters**: Apply state, district, or date filters for focused analysis
-    3. **Set Sample Size**: Choose how many records to analyze (100-5000)
+    3. **Set Records to Analyze**: Choose how many records to analyze (100-5000)
     4. **Load Data**: Click "Load Data" to fetch real Aadhaar data from APIs
     5. **Explore Analysis**: Use the analysis options to discover insights
     
@@ -209,7 +251,7 @@ else:
     
     # Enhanced data preview section
     with st.expander("🔍 Data Preview & Structure", expanded=False):
-        tabs = st.tabs(["📊 Summary", "📋 Columns", "🔢 Sample Data"])
+        tabs = st.tabs(["📊 Summary", "📋 Columns", "🔢 Real Data"])
         
         with tabs[0]:
             col1, col2, col3 = st.columns(3)
@@ -249,7 +291,7 @@ else:
         
         with tabs[2]:
             for name, df in datasets_info:
-                st.write(f"**{name} Dataset Sample (First 5 rows):**")
+                st.write(f"**{name} Dataset Preview (First 5 rows):**")
                 st.dataframe(df.head(), use_container_width=True)
                 st.markdown("---")
     
@@ -326,7 +368,7 @@ else:
         elif total_records > 500:
             insights.append(f"� **MediEum Dataset**: {total_records:,} records suitable for meaningful analysis")
         else:
-            insights.append(f"📊 **Small Dataset**: {total_records:,} records - consider increasing sample size for better insights")
+            insights.append(f"📊 **Small Dataset**: {total_records:,} records - consider increasing records to analyze for better insights")
         
         # Geographic coverage insights
         if states_count > 15:
@@ -433,25 +475,11 @@ else:
         st.subheader("📊 Univariate Analysis")
         st.caption("Single variable statistical analysis")
         
-        # Dataset selection
-        available_datasets = []
-        if not st.session_state.enrolment_data.empty:
-            available_datasets.append("Enrolment")
-        if not st.session_state.demographic_data.empty:
-            available_datasets.append("Demographic")
-        if not st.session_state.biometric_data.empty:
-            available_datasets.append("Biometric")
+        # Get primary dataset automatically
+        df, dataset_name = get_primary_dataset()
         
-        if available_datasets:
-            selected_dataset = st.selectbox("Select Dataset for Analysis", available_datasets)
-            
-            # Get the selected dataframe
-            if selected_dataset == "Enrolment":
-                df = st.session_state.enrolment_data
-            elif selected_dataset == "Demographic":
-                df = st.session_state.demographic_data
-            else:
-                df = st.session_state.biometric_data
+        if not df.empty:
+            st.info(f"📊 **Analyzing**: {dataset_name} dataset ({len(df):,} records)")
             
             # Column selection and analysis
             numeric_columns = df.select_dtypes(include=[np.number]).columns.tolist()
@@ -485,6 +513,8 @@ else:
                                           title=f"Distribution of {selected_numeric}")
                     fig_hist = apply_plotly_theme(fig_hist)
                     st.plotly_chart(fig_hist, use_container_width=True)
+                else:
+                    st.warning("⚠️ **No Numeric Columns** - No numeric columns available for analysis in this dataset.")
             
             with col2:
                 if categorical_columns:
@@ -509,29 +539,20 @@ else:
                                    title=f"Top 10 Values in {selected_categorical}")
                     fig_cat = apply_plotly_theme(fig_cat)
                     st.plotly_chart(fig_cat, use_container_width=True)
+                else:
+                    st.warning("⚠️ **No Categorical Columns** - No categorical columns available for analysis in this dataset.")
+        else:
+            st.info("📊 **No Data Available** - Please load data first from the sidebar to perform univariate analysis.")
     
     elif analysis_type == "Bivariate":
         st.subheader("🔗 Bivariate Analysis")
         st.caption("Relationship analysis between variables")
         
-        # Select dataset
-        available_datasets = []
-        if not st.session_state.enrolment_data.empty:
-            available_datasets.append("Enrolment")
-        if not st.session_state.demographic_data.empty:
-            available_datasets.append("Demographic")
-        if not st.session_state.biometric_data.empty:
-            available_datasets.append("Biometric")
+        # Get primary dataset automatically
+        df, dataset_name = get_primary_dataset()
         
-        if available_datasets:
-            selected_dataset = st.selectbox("Select Dataset", available_datasets, key="bivariate_dataset")
-            
-            if selected_dataset == "Enrolment":
-                df = st.session_state.enrolment_data
-            elif selected_dataset == "Demographic":
-                df = st.session_state.demographic_data
-            else:
-                df = st.session_state.biometric_data
+        if not df.empty:
+            st.info(f"📊 **Analyzing**: {dataset_name} dataset ({len(df):,} records)")
             
             # Select two columns
             columns = df.columns.tolist()
@@ -575,6 +596,10 @@ else:
                                        title=f"Box Plot: {var2} by {var1}")
                     fig_box = apply_plotly_theme(fig_box)
                     st.plotly_chart(fig_box, use_container_width=True)
+            else:
+                st.warning("⚠️ **Same Variables Selected** - Please select two different variables for bivariate analysis.")
+        else:
+            st.info("📊 **No Data Available** - Please load data first from the sidebar to perform bivariate analysis.")
     
     elif analysis_type == "Trivariate":
         st.subheader("🎯 Trivariate Analysis")
@@ -636,24 +661,11 @@ else:
         st.subheader("🤖 Advanced Machine Learning")
         st.caption("XGBoost predictive modeling and advanced analytics")
         
-        # Select dataset for ML
-        available_datasets = []
-        if not st.session_state.enrolment_data.empty:
-            available_datasets.append("Enrolment")
-        if not st.session_state.demographic_data.empty:
-            available_datasets.append("Demographic")
-        if not st.session_state.biometric_data.empty:
-            available_datasets.append("Biometric")
+        # Get primary dataset automatically
+        df, dataset_name = get_primary_dataset()
         
-        if available_datasets:
-            selected_dataset = st.selectbox("📊 Select Dataset for ML", available_datasets, key="ml_dataset")
-            
-            if selected_dataset == "Enrolment":
-                df = st.session_state.enrolment_data
-            elif selected_dataset == "Demographic":
-                df = st.session_state.demographic_data
-            else:
-                df = st.session_state.biometric_data
+        if not df.empty:
+            st.info(f"📊 **Analyzing**: {dataset_name} dataset ({len(df):,} records)")
             
             # Get numeric columns for ML
             numeric_columns = df.select_dtypes(include=[np.number]).columns.tolist()
@@ -760,7 +772,7 @@ else:
             else:
                 st.warning("⚠️ **Insufficient Numeric Data** - Need at least 2 numeric columns for ML modeling")
         else:
-            st.info("📊 **No Data Available** - Please load data first to use ML features")
+            st.info("📊 **No Data Available** - Please load data first from the sidebar to use ML features.")
     
     elif analysis_type == "Clustering":
         st.subheader("🎯 Advanced Clustering Analysis")
@@ -1429,24 +1441,11 @@ else:
         st.subheader("🚀 Breakthrough Insights - UNIQUE DISCOVERIES")
         st.caption("Revolutionary insights that will WOW the judges and win the hackathon!")
         
-        # Select dataset for breakthrough insights
-        available_datasets = []
-        if not st.session_state.enrolment_data.empty:
-            available_datasets.append("Enrolment")
-        if not st.session_state.demographic_data.empty:
-            available_datasets.append("Demographic")
-        if not st.session_state.biometric_data.empty:
-            available_datasets.append("Biometric")
+        # Get primary dataset automatically
+        df, dataset_name = get_primary_dataset()
         
-        if available_datasets:
-            selected_dataset = st.selectbox("📊 Select Dataset for Breakthrough Analysis", available_datasets, key="breakthrough_dataset")
-            
-            if selected_dataset == "Enrolment":
-                df = st.session_state.enrolment_data
-            elif selected_dataset == "Demographic":
-                df = st.session_state.demographic_data
-            else:
-                df = st.session_state.biometric_data
+        if not df.empty:
+            st.info(f"📊 **Analyzing**: {dataset_name} dataset ({len(df):,} records)")
             
             if st.button("🚀 Generate BREAKTHROUGH Insights", type="primary"):
                 with st.spinner("Generating revolutionary insights that nobody else will find..."):
@@ -1664,7 +1663,7 @@ else:
                     else:
                         st.error("❌ **Error**: Unable to generate breakthrough insights from current data")
         else:
-            st.info("📊 **No Data Available** - Please load data first to generate breakthrough insights")
+            st.info("📊 **No Data Available** - Please load data first from the sidebar to generate breakthrough insights.")
     
     elif analysis_type == "🧠 Revolutionary Questions":
         st.subheader("🧠 Revolutionary Questions Nobody Else Will Ask")
@@ -1682,24 +1681,11 @@ else:
         6. **⚡ Causal Inference**: What are the true cause-effect relationships in Aadhaar usage?
         """)
         
-        # Select dataset for revolutionary analysis
-        available_datasets = []
-        if not st.session_state.enrolment_data.empty:
-            available_datasets.append("Enrolment")
-        if not st.session_state.demographic_data.empty:
-            available_datasets.append("Demographic")
-        if not st.session_state.biometric_data.empty:
-            available_datasets.append("Biometric")
+        # Get primary dataset automatically
+        df, dataset_name = get_primary_dataset()
         
-        if available_datasets:
-            selected_dataset = st.selectbox("📊 Select Dataset for Revolutionary Analysis", available_datasets, key="revolutionary_dataset")
-            
-            if selected_dataset == "Enrolment":
-                df = st.session_state.enrolment_data
-            elif selected_dataset == "Demographic":
-                df = st.session_state.demographic_data
-            else:
-                df = st.session_state.biometric_data
+        if not df.empty:
+            st.info(f"📊 **Analyzing**: {dataset_name} dataset ({len(df):,} records)")
             
             if st.button("🧠 Answer Revolutionary Questions", type="primary"):
                 with st.spinner("Answering questions that nobody else will think to ask..."):
@@ -2098,7 +2084,7 @@ if st.session_state.data_loaded and st.session_state.get('filters_loaded', False
             st.write(f"**District:** {district_filter}")
         if 'date_start' in locals() and 'date_end' in locals():
             st.write(f"**Date Range:** {date_start} to {date_end}")
-        st.write(f"**Sample Size:** {sample_size:,}")
+        st.write(f"**Records Analyzed:** {records_to_analyze:,}")
 
 # Footer
 st.markdown("---")

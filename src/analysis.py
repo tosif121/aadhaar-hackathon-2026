@@ -470,7 +470,7 @@ class ROICalculator:
         return {
             'fraud_cases_prevented': fraud_cases_prevented,
             'total_savings': total_savings,
-            'fraud_reduction_percentage': (fraud_reduction / fraud_rate_before) * 100
+            'fraud_reduction_percentage': (fraud_reduction / fraud_rate_before) * 100 if fraud_rate_before > 0 else 0
         }
 
 class NovelInsightGenerator:
@@ -556,7 +556,7 @@ class NovelInsightGenerator:
         # Factor in age group digital adoption
         if 'age_group' in df.columns:
             young_population = len(df[df['age_group'].str.contains('18-30|31-40', na=False)])
-            innovation_readiness = (digital_adoption_rate * 0.7) + ((young_population / total_updates) * 0.3)
+            innovation_readiness = (digital_adoption_rate * 0.7) + ((young_population / total_updates) * 0.3) if total_updates > 0 else digital_adoption_rate
         else:
             innovation_readiness = digital_adoption_rate
         
@@ -675,7 +675,7 @@ class NovelInsightGenerator:
             
             policy_simulations['digital_first_policy'] = {
                 'annual_savings': digital_first_savings * 365,  # Assuming daily data
-                'efficiency_gain': ((current_cost - simulated_cost) / current_cost) * 100,
+                'efficiency_gain': ((current_cost - simulated_cost) / current_cost) * 100 if current_cost > 0 else 0,
                 'implementation_cost': 50000000,  # 5 crore
                 'roi': ((digital_first_savings * 365) / 50000000) * 100
             }
@@ -699,7 +699,7 @@ class NovelInsightGenerator:
             policy_simulations['regional_hub_optimization'] = {
                 'implementation_cost': hub_optimization_cost,
                 'annual_benefits': total_hub_benefits,
-                'roi': (total_hub_benefits / hub_optimization_cost) * 100,
+                'roi': (total_hub_benefits / hub_optimization_cost) * 100 if hub_optimization_cost > 0 else 0,
                 'states_impacted': len(underserved_states),
                 'citizens_benefited': len(underserved_states) * 50000
             }
@@ -1733,8 +1733,8 @@ class AdvancedAadhaarAnalyzer:
         roi_analysis['total_roi'] = {
             'total_investment': total_investment,
             'annual_savings': total_annual_savings,
-            'roi_percentage': (total_annual_savings / total_investment) * 100,
-            'payback_period_months': (total_investment / (total_annual_savings / 12)),
+            'roi_percentage': (total_annual_savings / total_investment) * 100 if total_investment > 0 else 0,
+            'payback_period_months': (total_investment / (total_annual_savings / 12)) if total_annual_savings > 0 else 0,
             '3_year_net_benefit': (total_annual_savings * 3) - total_investment
         }
         
@@ -1807,7 +1807,7 @@ class AdvancedAadhaarAnalyzer:
         if contingency_table.shape == (2, 2):
             chi2 = stats.chi2_contingency(contingency_table)[0]
             n = contingency_table.sum().sum()
-            return np.sqrt(chi2 / n)
+            return np.sqrt(chi2 / n) if n > 0 else 0
         return np.nan
     
     def _cramers_v(self, contingency_table: pd.DataFrame) -> float:

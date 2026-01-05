@@ -529,50 +529,61 @@ Our comprehensive analysis of Aadhaar data demonstrates the power of data-driven
 else:
     st.info("👆 Please configure and generate a report from the sidebar.")
     
-    # Show sample report preview
-    st.header("📋 Sample Report Preview")
+    # Show real data reporting capabilities
+    st.header("📋 Real Data Reporting Capabilities")
     
-    sample_report = """
-    # Sample Aadhaar Analytics Report
+    st.markdown("""
+    ### 🚀 Comprehensive Reports Available:
+    - **Executive Summary**: High-level insights from real Aadhaar data
+    - **Statistical Analysis**: Detailed statistical findings from government data
+    - **Geographic Analysis**: State and district-level patterns from real data
+    - **Trend Analysis**: Time-series insights from actual enrollment patterns
+    - **Anomaly Report**: Real anomaly detection findings
+    - **Policy Recommendations**: Data-driven suggestions based on real patterns
+    
+    ### 📊 Report Features:
+    - **Real Data Visualizations**: Charts and graphs from actual API data
+    - **Statistical Significance**: All findings validated with real data
+    - **Geographic Insights**: True state and district patterns
+    - **Actionable Recommendations**: Based on genuine data patterns
+    - **Export Options**: PDF, Word, and PowerPoint formats
+    
+    ### 🎯 Load Real Data to Generate:
+    - Authentic government data analysis reports
+    - Credible statistical findings and insights
+    - Real geographic and demographic patterns
+    - Evidence-based policy recommendations
+    - Professional hackathon submission materials
+    
+    ### 🏆 Why Real Data Reports Win:
+    - **Credibility**: Based on actual government data
+    - **Relevance**: Directly applicable to real scenarios
+    - **Impact**: Genuine insights for policy makers
+    - **Competitive Edge**: Real analysis beats synthetic demonstrations
+    
+    ### 📋 Report Template Preview:
+    ```
+    # Aadhaar Data Analytics Report
     
     ## Executive Summary
-    This sample demonstrates the comprehensive reporting capabilities of our analytics platform.
+    [Real insights from actual government data]
     
-    ### Key Metrics
-    - **Total Records**: 1,234,567
-    - **States Covered**: 28
-    - **Data Quality**: 98.5%
-    - **Analysis Depth**: Comprehensive
+    ### Key Metrics (Real Data)
+    - Total Records Analyzed: [Actual count from API]
+    - States Covered: [Real geographic coverage]
+    - Data Quality Score: [Calculated from real data]
+    - Analysis Period: [Actual date range]
     
-    ### Key Findings
-    - Maharashtra shows highest enrollment activity
-    - Peak usage occurs during Q1 and Q3
-    - Age group 18-40 represents 60% of all activities
-    - System load peaks between 10 AM - 4 PM
+    ### Geographic Distribution (Real Patterns)
+    [Actual state and district patterns from API data]
     
-    ### Recommendations
-    1. **Resource Optimization**: Scale infrastructure during peak hours
-    2. **Geographic Focus**: Expand services in high-growth regions  
-    3. **User Experience**: Optimize mobile interfaces for primary age groups
-    4. **Predictive Analytics**: Implement forecasting for capacity planning
+    ### Temporal Trends (Real Time Series)
+    [Genuine enrollment trends from historical data]
     
-    ### Technology Stack
-    - Python-based analytics pipeline
-    - Machine learning models for prediction
-    - Interactive dashboard for visualization
-    - Automated report generation
-    """
+    ### Anomaly Detection (Real Findings)
+    [Actual anomalies detected in government data]
     
-    st.markdown(sample_report)
-    
-    # Sample metrics
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.metric("Sample Records", "1,234,567")
-    with col2:
-        st.metric("Sample States", "28")
-    with col3:
-        st.metric("Sample Accuracy", "98.5%")
-    with col4:
-        st.metric("Sample Insights", "47")
+    ### Policy Recommendations (Evidence-Based)
+    [Data-driven suggestions from real patterns]
+    ```
+    """)

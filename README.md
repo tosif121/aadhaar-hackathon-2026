@@ -104,7 +104,7 @@ The dashboard will open in your browser at `http://localhost:8501`
 # Run complete analysis pipeline
 python run_analysis.py
 
-# Quick analysis with sample data
+# Quick analysis with real data
 python scripts/quick_analysis.py
 
 # Fetch data from APIs
@@ -200,7 +200,7 @@ The platform uses the official data.gov.in API:
 - **Rate Limiting**: Implemented with 0.5s delays between requests
 
 ### Analysis Parameters
-- **Default Sample Size**: 1,000 records
+- **Default Records to Analyze**: 1,000 records
 - **Maximum Records**: 5,000 per dataset
 - **Cross-Validation Folds**: 5
 - **Random Seed**: 42 (for reproducibility)
@@ -213,7 +213,7 @@ The platform uses the official data.gov.in API:
 - Apply dynamic filters based on real data
 - State and district-level filtering
 - Date range filtering
-- Sample size configuration
+- Records to analyze configuration
 
 ### 2. Statistical Analysis
 - **Overview**: Dataset distribution and geographic patterns
@@ -329,7 +329,7 @@ flake8 src/
 ### Getting Help
 - **Issues**: Report bugs and feature requests via GitHub issues
 - **Documentation**: Comprehensive inline documentation
-- **Examples**: Sample notebooks and scripts provided
+- **Examples**: Real data analysis notebooks and scripts provided
 - **Community**: Active development and support
 
 ### API Documentation

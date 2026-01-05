@@ -566,7 +566,6 @@ if ('analytics_enrolment' in st.session_state or
 else:
     st.info("👆 Please load analytics data from the sidebar to begin analysis.")
     
-    # Show sample analytics preview
     st.header("📊 Analytics Dashboard")
     
     st.info("👆 **Load Real Data**: Click the 'Load Analytics Data' button in the sidebar to fetch real Aadhaar data for comprehensive analytics.")
@@ -589,5 +588,5 @@ else:
     4. **Insights**: Extract meaningful patterns and trends
     5. **Export**: Save your findings for hackathon submission
     
-    **Note**: All analysis uses real government data from data.gov.in APIs - no mock or sample data.
+    **Note**: All analysis uses real government data from data.gov.in APIs - no synthetic data.
     """)
