@@ -1,5 +1,17 @@
 # 🇮🇳 Aadhaar Data Analytics Platform - Hackathon 2026
 
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://aadhaar-analytics-2026.streamlit.app)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![GitHub](https://img.shields.io/badge/GitHub-Yashwant--singh102-black?logo=github)](https://github.com/Yashwant-singh102/aadhaar-hackathon)
+
+## 🌐 Live Demo
+**🚀 Try the app:** [https://aadhaar-analytics-2026.streamlit.app](https://aadhaar-analytics-2026.streamlit.app)
+
+**💻 Source Code:** [https://github.com/Yashwant-singh102/aadhaar-hackathon](https://github.com/Yashwant-singh102/aadhaar-hackathon)
+
+---
+
 ## 🎯 Project Overview
 Advanced AI/ML-powered analytics platform for Aadhaar data analysis featuring real-time insights, predictive modeling, and comprehensive statistical analysis. Built for the Data-Driven Innovation Hackathon 2026.
 
@@ -84,8 +96,8 @@ brew install libomp
 ### Installation
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd aadhaar-hackathon-2026
+git clone https://github.com/Yashwant-singh102/aadhaar-hackathon.git
+cd aadhaar-hackathon
 
 # Install Python dependencies
 pip install -r requirements.txt
