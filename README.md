@@ -1,12 +1,12 @@
 # 🇮🇳 Aadhaar Data Analytics Platform - Hackathon 2026
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://aadhaar-analytics-2026.streamlit.app)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://aadhaar-analytics.streamlit.app)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![GitHub](https://img.shields.io/badge/GitHub-Yashwant--singh102-black?logo=github)](https://github.com/Yashwant-singh102/aadhaar-hackathon)
 
 ## 🌐 Live Demo
-**🚀 Try the app:** [https://aadhaar-analytics-2026.streamlit.app](https://aadhaar-analytics-2026.streamlit.app)
+**🚀 Try the app:** [https://aadhaar-analytics.streamlit.app](https://aadhaar-analytics.streamlit.app)
 
 **💻 Source Code:** [https://github.com/Yashwant-singh102/aadhaar-hackathon](https://github.com/Yashwant-singh102/aadhaar-hackathon)
 
